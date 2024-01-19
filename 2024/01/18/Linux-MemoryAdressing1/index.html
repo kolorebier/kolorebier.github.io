@@ -13,30 +13,27 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="贾某">
+  <meta name="author" content="BigPig">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Just Test">
+    <meta name="description" content="Linux中的分页">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Test">
-<meta property="og:url" content="http://bigpig.icu/2023/12/22/Test/index.html">
+<meta property="og:title" content="Linux内存寻址的分页机制">
+<meta property="og:url" content="http://bigpig.icu/2024/01/18/Linux-MemoryAdressing1/index.html">
 <meta property="og:site_name" content="BigPig">
-<meta property="og:description" content="Just Test">
+<meta property="og:description" content="Linux中的分页">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://bigpig.icu/img/example1.jpg">
-<meta property="article:published_time" content="2023-12-22T08:43:30.000Z">
-<meta property="article:modified_time" content="2024-01-06T07:51:30.265Z">
-<meta property="article:author" content="贾某">
-<meta property="article:tag" content="Fun">
-<meta property="article:tag" content="happy">
+<meta property="article:published_time" content="2024-01-18T12:29:40.000Z">
+<meta property="article:modified_time" content="2024-01-19T03:45:11.440Z">
+<meta property="article:author" content="BigPig">
+<meta property="article:tag" content="分页">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://bigpig.icu/img/example1.jpg">
   
   
-    <meta name="referrer" content="no-referrer-when-downgrade">
   
-  
-  <title>Test - BigPig</title>
+  <title>Linux内存寻址的分页机制 - BigPig</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -202,7 +199,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Test"></span>
+            <span id="subtitle" data-typed-text="Linux内存寻址的分页机制"></span>
           
         </div>
 
@@ -213,8 +210,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-12-22 16:43" pubdate>
-          2023年12月22日 下午
+        <time datetime="2024-01-18 20:29" pubdate>
+          2024年1月18日 晚上
         </time>
       </span>
     
@@ -225,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          32 字
+          408 字
         
       </span>
     
@@ -236,7 +233,7 @@
         
         
         
-          1 分钟
+          4 分钟
         
       </span>
     
@@ -244,9 +241,9 @@
     
     
       
-        <span id="busuanzi_container_page_pv" style="display: none">
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
           <i class="iconfont icon-eye" aria-hidden="true"></i>
-          <span id="busuanzi_value_page_pv"></span> 次
+          <span id="leancloud-page-views"></span> 次
         </span>
         
       
@@ -285,12 +282,54 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">Test</h1>
+            <h1 id="seo-header">Linux内存寻址的分页机制</h1>
             
             
               <div class="markdown-body">
                 
-                <div class="note note-info">
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>如下图所示，进程1和进程2拥有完整的虚拟地址空间，不同的进程共享同一个内核，其内核空间的地址对应的物理地址都是一样的。因而进程1和进程2中内核空间的VA K地址都映射到了物理内存的PA K地址。而不同的进程的用户空间是不同的，进程1和进程2相同的虚拟地址VA 1和VA 2分别映射到了不同的物理地址PA 1和PA 2上。<br><img src="/img/vatopa.jpg" srcset="/img/loading.gif" lazyload> </p>
+<h1 id="硬件中的分页"><a href="#硬件中的分页" class="headerlink" title="硬件中的分页"></a>硬件中的分页</h1><p>线性地址被分为以固定长度为单位的组,称为页(page)。页内部连续的线性地址被映射到连续的物理地址中。内核可以指定一个页的物理地址和存取权限。<br><br>对于虚拟地址空间，分页机制将地址空间分割成固定大小的单元，每个单元称为一页。<br><br>对于物理地址空间，物理内存被抽象成固定大小的单元，每个单元称为页框(page frame)<br>一个页框的长度与一页的长度相等，一般分页大小为4KB。<br></p>
+<h2 id="常规分页"><a href="#常规分页" class="headerlink" title="常规分页"></a>常规分页</h2><p>32位的线性地址被分为3个域：</p>
+<ol>
+<li>高10位：Directory（目录）</li>
+<li>中间10位：table（页表）</li>
+<li>最低12位：offset（偏移量）</li>
+</ol>
+<p>线性地址转换分2部分，每一步都基于一种转换表，使用2级模式的目的在于减少所需ram的数量。如果使用简单的1级页表，需要2^20（1MB）个表项，在每一项32位4个字节的情况下，一个进程就需要4MB的ram来存储页表。</p>
+<!-- 
+###### 6
+---
+>this is quote
+---
+It's a **demo** document, Preview it via the top right button! 
+---
+有序列表
+1. 第一
+2. 第二
+3. 第三
+---
+
+代码块:
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125; <br></code></pre></td></tr></table></figure>
+<hr>
+<p>数学公式<br>$$<br> \frac{1-x}{y+1}*x    \over x+y<br>$$<br>— –&gt;</p>
+<!-- 以下全部是内联元素
+1.软连接
+2.图片
+ -->
+<!-- 
+[百度][id]
+
+![pic](/Web/jpg/21c5e0bde54297ceaf3303e4912ea71.jpg)
+
+[id]:http://www.baidu.com/
+ -->
+
+
+
+
+
+<!-- <div class="note note-info">
             <p>这是一个<strong>info</strong>tag</p>
           </div>
 
@@ -311,7 +350,7 @@
           </div>
 <div>
             <input type="checkbox"  >i am a button too
-          </div>
+          </div> -->
 
 
 <!-- <div class="group-image-container"><div class="group-image-row"><div class="group-image-wrap"><img src="/img/test.jpg" srcset="/img/loading.gif" lazyload></div><div class="group-image-wrap"><img src="/img/test.jpg" srcset="/img/loading.gif" lazyload></div><div class="group-image-wrap"><img src="/img/test.jpg" srcset="/img/loading.gif" lazyload></div></div><div class="group-image-row"><div class="group-image-wrap"><img src="/img/test.jpg" srcset="/img/loading.gif" lazyload></div><div class="group-image-wrap"><img src="/img/test.jpg" srcset="/img/loading.gif" lazyload></div></div><div class="group-image-row"><div class="group-image-wrap"><img src="/img/test.jpg" srcset="/img/loading.gif" lazyload></div></div></div> -->
@@ -354,9 +393,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/Fun/" class="print-no-link">#Fun</a>
-      
-        <a href="/tags/happy/" class="print-no-link">#happy</a>
+        <a href="/tags/%E5%88%86%E9%A1%B5/" class="print-no-link">#分页</a>
       
     </div>
   
@@ -368,20 +405,20 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Test</div>
-      <div>http://bigpig.icu/2023/12/22/Test/</div>
+      <div>Linux内存寻址的分页机制</div>
+      <div>http://bigpig.icu/2024/01/18/Linux-MemoryAdressing1/</div>
     </div>
     <div class="license-meta">
       
         <div class="license-meta-item">
           <div>作者</div>
-          <div>贾某</div>
+          <div>BigPig</div>
         </div>
       
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年12月22日</div>
+          <div>2024年1月18日</div>
         </div>
       
       
@@ -392,9 +429,15 @@
             
               
               
-                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
                   <span class="hint--top hint--rounded" aria-label="BY - 署名">
                     <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-sa"></i>
                   </span>
                 </a>
               
@@ -417,8 +460,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/12/21/hello-world/" title="Hello World">
-                        <span class="hidden-mobile">Hello World</span>
+                      <a href="/2023/12/22/Linux-MemoryAdressing/" title="Linux内存寻址的分段机制">
+                        <span class="hidden-mobile">Linux内存寻址的分段机制</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
@@ -525,30 +568,17 @@
     </div>
   
   
-    <div class="statistics">
   
-  
-
-  
-    
-      <span id="busuanzi_container_site_pv" style="display: none">
-        总访问量 
-        <span id="busuanzi_value_site_pv"></span>
-         次
-      </span>
-    
-    
-      <span id="busuanzi_container_site_uv" style="display: none">
-        总访客数 
-        <span id="busuanzi_value_site_uv"></span>
-         人
-      </span>
-    
-    
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      冀ICP备2024047930号
+    </a>
+  </span>
   
 </div>
 
-  
   
   
 </div>
@@ -695,7 +725,7 @@
 
   <script  src="/js/local-search.js" ></script>
 
-  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+  <script defer src="/js/leancloud.js" ></script>
 
 
 

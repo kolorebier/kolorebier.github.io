@@ -16,23 +16,24 @@
   <meta name="author" content="BigPig">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Welcome to Hexo! This is your very first post.">
+    <meta name="description" content="Linux中的分段">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://bigpig.icu/2023/12/21/hello-world/index.html">
+<meta property="og:title" content="Linux内存寻址的分段机制">
+<meta property="og:url" content="http://bigpig.icu/2023/12/22/Linux-MemoryAdressing/index.html">
 <meta property="og:site_name" content="BigPig">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post.">
+<meta property="og:description" content="Linux中的分段">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://bigpig.icu/img/hello1.jpg">
-<meta property="article:published_time" content="2023-12-21T12:13:06.101Z">
-<meta property="article:modified_time" content="2023-12-30T08:36:24.137Z">
+<meta property="og:image" content="http://bigpig.icu/img/example1.jpg">
+<meta property="article:published_time" content="2023-12-22T08:43:30.000Z">
+<meta property="article:modified_time" content="2024-01-18T12:40:39.785Z">
 <meta property="article:author" content="BigPig">
+<meta property="article:tag" content="分段">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://bigpig.icu/img/hello1.jpg">
+<meta name="twitter:image" content="http://bigpig.icu/img/example1.jpg">
   
   
   
-  <title>Hello World - BigPig</title>
+  <title>Linux内存寻址的分段机制 - BigPig</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -192,13 +193,13 @@
   
 
 <div id="banner" class="banner" parallax=true
-     style="background: url('/img/hello.jpg') no-repeat center center; background-size: cover;">
+     style="background: url('/img/example.jpg') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
     <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Hello World"></span>
+            <span id="subtitle" data-typed-text="Linux内存寻址的分段机制"></span>
           
         </div>
 
@@ -209,8 +210,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-12-21 20:13" pubdate>
-          2023年12月21日 晚上
+        <time datetime="2023-12-22 16:43" pubdate>
+          2023年12月22日 下午
         </time>
       </span>
     
@@ -221,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          18 字
+          1.7k 字
         
       </span>
     
@@ -232,7 +233,7 @@
         
         
         
-          1 分钟
+          15 分钟
         
       </span>
     
@@ -281,26 +282,65 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">Hello World</h1>
+            <h1 id="seo-header">Linux内存寻址的分段机制</h1>
             
             
               <div class="markdown-body">
                 
-                <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. </p>
-<span id="more"></span>
-<p>Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo new <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo server<br></code></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo generate<br></code></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+                <h1 id="内存寻址"><a href="#内存寻址" class="headerlink" title="内存寻址"></a>内存寻址</h1><h2 id="内存地址"><a href="#内存地址" class="headerlink" title="内存地址"></a>内存地址</h2><ol>
+<li>逻辑地址：存在于机器指令中用来指定一个操作数或者一条指令的地址。通常用于x86的分段结构中，每一个逻辑地址由一个<strong>段地址</strong>和<strong>段内偏移量</strong>两个部分组成。</li>
+<li>线性地址（虚拟地址）：用一个32位的无符号整数表示，共4294967296(2^32)个地址，寻址空间可以达到4GB(1GB&#x3D;2^30B)，线性地址通常由十六进制数表示，取值范围为0x00000000-0xffffffff。</li>
+<li>物理地址：用于内存芯片级内存单元进行寻址。它们与从微处理器的地址引脚发送到内存总线上的电信号对应。物理地址可以由32位或者64位无符号整数表示，地址引脚的数量决定了物理地址的寻址范围。</li>
+</ol>
+<h2 id="使用虚拟地址的好处"><a href="#使用虚拟地址的好处" class="headerlink" title="使用虚拟地址的好处"></a>使用虚拟地址的好处</h2><ul>
+<li>为了使进程摆脱系统内存的制约，用户进程运行在虚拟内存之上，每个用户进程都拥有完整的虚拟地址空间，互不干涉。而实现虚拟内存的关键就在于建立虚拟地址(Virtual Address,VA)与物理地址(Physical Address,PA)之间的关系。</li>
+<li>避免用户直接访问物理内存地址，防止一些破坏性操作，保护操作系统</li>
+<li>每个进程都被分配了4GB的虚拟内存，用户程序可使用比实际物理内存更大的地址空间</li>
+<li>4GB 的进程虚拟地址空间被分成两部分：「用户空间」和「内核空间」</li>
+</ul>
+<h2 id="内存控制单元MMU"><a href="#内存控制单元MMU" class="headerlink" title="内存控制单元MMU"></a>内存控制单元MMU</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><ul>
+<li>内存控制单元封装在CPU芯片内部，负责将逻辑地址转换成物理地址。</li>
+</ul>
+<h3 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h3><ul>
+<li>MMU通过一种称为分段单元的硬件电路把逻辑地址转化为虚拟地址，接着通过一个称为分页单元的硬件电路把虚拟地址转化为物理地址。</li>
+</ul>
+<p><img src="/img/MMU.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="硬件中的分段"><a href="#硬件中的分段" class="headerlink" title="硬件中的分段"></a>硬件中的分段</h2><h3 id="段选择符和段寄存器"><a href="#段选择符和段寄存器" class="headerlink" title="段选择符和段寄存器"></a>段选择符和段寄存器</h3><h4 id="段选择符"><a href="#段选择符" class="headerlink" title="段选择符"></a>段选择符</h4><p>每一个逻辑地址由一个<strong>段选择符</strong>和<strong>段内偏移量</strong>两个部分组成。段选择符是一个16位长的字段，段偏移量是一个32位长的字段。<br><img src="/img/duanxzf.png" srcset="/img/loading.gif" lazyload></p>
+<h4 id="段寄存器"><a href="#段寄存器" class="headerlink" title="段寄存器"></a>段寄存器</h4><p>为了找到段选择符，CPU提供cs、ss、ds、es、fs、gs六个段寄存器。<br></p>
+<ul>
+<li>cs为代码段寄存器，指向包含程序指令的段</li>
+<li>ss为栈段寄存器，指向包含当前程序栈的段</li>
+<li>ds为数据段寄存器，指向包含静态数据或者全局数据段</li>
+<li>其它三个段寄存器可以指向任意数据段<br><br>cs段寄存器包含一个2bit的字段，用于指明CPU当前特权级别（Current Privilege Level，CPL），0表示最高级，3表示最低优先级。Linux中只使用0、3两个级别，分表表示内核态、用户态。</li>
+</ul>
+<h3 id="段描述符"><a href="#段描述符" class="headerlink" title="段描述符"></a>段描述符</h3><p>段由段描述符由8byte表示。描述符存放在<strong>全局描述符表</strong>(Global Descriptor Table，GDT)或<strong>局部描述符表</strong>(Local Descriptor Table，LDT)中。<br><br>每个机器通常只定义一个GDT，每个进程还可以拥有自己的LDT，用于存放自己定义的附加的段。GDT、LDT在主存中的地址和大小分别存放在控制寄存器gdtr、ldtr中。<br><br>段描述符字段解释如下：<br><img src="/img/duanmsf.png" srcset="/img/loading.gif" lazyload></p>
+<h4 id="常用段描述符类型："><a href="#常用段描述符类型：" class="headerlink" title="常用段描述符类型："></a>常用段描述符类型：</h4><ul>
+<li>代码段描述符</li>
+<li>数据段描述符</li>
+<li>任务状态段描述符：任务状态段用于保存处理器寄存器内容，此描述符只出现在GDT中，依据相应进程是否在CPU上运行，TYPE字段的值分别为11或9。</li>
+<li>局部描述符表(LDT)描述符：只出现在GDT中，相应TYPE字段为2。</li>
+</ul>
+<h3 id="逻辑地址转换流程"><a href="#逻辑地址转换流程" class="headerlink" title="逻辑地址转换流程"></a>逻辑地址转换流程</h3><ol>
+<li>获取段选择符TI字段值，确定对应段描述符存在在GDT还是LDT中，如果取值为0则从gdtr获取全局描述符表的基址，1则从ldtr中获取。</li>
+<li>根据段选择符的index字段计算段描述符的地址（index * 8 + 选择的gdtr或ldtr寄存器的值）。</li>
+<li>将逻辑地址段内偏移量与段描述符中的Base字段值相加即可得到线性地址。<br><br><img src="/img/ljdzzh.png" srcset="/img/loading.gif" lazyload></li>
+</ol>
+<h2 id="Linux中的分段"><a href="#Linux中的分段" class="headerlink" title="Linux中的分段"></a>Linux中的分段</h2><p><img src="/img/linuxfd.png" srcset="/img/loading.gif" lazyload><br>由此可见，所有的段都是从0x00000000开始所以Linux中逻辑地址偏移量字段与虚拟地址总是一致的(虚拟地址&#x3D;0x00000000+段偏移量)。<BR><br>逻辑地址对应的段选择符由4个宏__USER_CS、__USER_DS、__KERNEL_CS、__KERNEL_DS定义<br><br>CPU特权级(CPL)由存放在cs寄存器中的段选择符RPL字段指定,反映了进程是在用户态还是在内核态。只要CPL特权级别改变，相应的段寄存器必须进行更新。例如：CPL&#x3D;3(用户态)，ds寄存器必须指向用户态数据段的段选择符，而当CPU&#x3D;0(内核态)时，ds寄存器必须指向内核态数据段的段选择符。<br></p>
+<h3 id="linux-GDT"><a href="#linux-GDT" class="headerlink" title="linux GDT"></a>linux GDT</h3><p>在单处理器中只有一个GDT，而在多处理器系统中，每个CPU对应一个GDT。每个GDT数据存储在cpu_gdt_tables数组中，每个GDT的地址和它们的大小则存放在cpu_gdt_descr数组中。每个GDT包含18个段描述符和14个空的或保留的段共32个段。<BR><br>常用的段描述符介绍如下：</p>
+<ul>
+<li>用户态和内核态下的代码段、数据段(4个)</li>
+<li>任务状态段(TSS)：每个CPU有一个，每个TSS对应的线性地址空间是内核数据段线性地址空间的子集。所有任务状态段都顺序存放在init_tss数组中，第n个CPU的TSS段描述符的Base指向init_tss数组数组中第n个元素的地址。</li>
+<li>1个缺省的局部描述符表段：这缺省的局部描述符段由所有线程共享。</li>
+<li>局部线程存储段（3个TLS）：允许多线程应用使用最多3个局部于线程的数据段。</li>
+<li>特殊TSS段：当处理一个异常时引发另外一个异常，则会触发“双重异常”，这个段被内核用来处理此类异常。<br></li>
+</ul>
+<p>系统中每个处理器中的GDT副本都存储相同的项，除了下述几种情况：</p>
+<ul>
+<li>每个处理器有自己的TSS段</li>
+<li>GDT中少数依赖于CPU正在执行进程的项（LDT、TLS段）</li>
+<li>某些情况下，处理器临时修改GDT副本中的项，例如调用AMP的BIOS例程。</li>
+</ul>
+<h3 id="linux-LDT"><a href="#linux-LDT" class="headerlink" title="linux LDT"></a>linux LDT</h3><p>大多数用户态Linux进程不适用局部段描述符表，因此内核定义了一个缺省的LDT，存储在default_ldt数组中。可以使用modify_ldt()函数来创建自定义局部描述符表，当处理器执行包含自定义LDT的进程时，GDT中的LDT字段值相应就修改了。</p>
 
                 
               </div>
@@ -309,6 +349,41 @@
             <div>
               <div class="post-metas my-3">
   
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Linux/" class="category-chain-item">Linux</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Linux/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" class="category-chain-item">内存管理</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%88%86%E6%AE%B5/" class="print-no-link">#分段</a>
+      
+    </div>
   
 </div>
 
@@ -318,8 +393,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Hello World</div>
-      <div>http://bigpig.icu/2023/12/21/hello-world/</div>
+      <div>Linux内存寻址的分段机制</div>
+      <div>http://bigpig.icu/2023/12/22/Linux-MemoryAdressing/</div>
     </div>
     <div class="license-meta">
       
@@ -331,7 +406,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年12月21日</div>
+          <div>2023年12月22日</div>
         </div>
       
       
@@ -369,15 +444,21 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/12/22/Linux-MemoryAdressing/" title="Linux内存寻址的分段机制">
+                      <a href="/2024/01/18/Linux-MemoryAdressing1/" title="Linux内存寻址的分页机制">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Linux内存寻址的分段机制</span>
+                        <span class="hidden-mobile">Linux内存寻址的分页机制</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2023/12/21/hello-world/" title="Hello World">
+                        <span class="hidden-mobile">Hello World</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>
