@@ -25,9 +25,9 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://bigpig.icu/img/example1.jpg">
 <meta property="article:published_time" content="2024-01-18T12:29:40.000Z">
-<meta property="article:modified_time" content="2024-01-19T03:45:11.440Z">
+<meta property="article:modified_time" content="2024-01-21T12:25:39.206Z">
 <meta property="article:author" content="BigPig">
-<meta property="article:tag" content="分页">
+<meta property="article:tag" content="page">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://bigpig.icu/img/example1.jpg">
   
@@ -222,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          408 字
+          1.1k 字
         
       </span>
     
@@ -233,7 +233,7 @@
         
         
         
-          4 分钟
+          9 分钟
         
       </span>
     
@@ -295,7 +295,41 @@
 <li>中间10位：table（页表）</li>
 <li>最低12位：offset（偏移量）</li>
 </ol>
-<p>线性地址转换分2部分，每一步都基于一种转换表，使用2级模式的目的在于减少所需ram的数量。如果使用简单的1级页表，需要2^20（1MB）个表项，在每一项32位4个字节的情况下，一个进程就需要4MB的ram来存储页表。</p>
+<p>线性地址转换分2部分，每一步都基于一种转换表，使用2级模式的目的在于减少所需ram的数量。<br><br>例如：内核给一个进程分配的线性空间为0X20000000-0x2003ffff<br>使用1级页表需要255个页表项<br>而使用2级需要1个页目录64个页表。<br><br>页目录有10位，所以有1024个页表(每个页表有许多字段，可能有很多位)，每个页表又有1024个页，所以共有2^32个存储单元。页偏移量位12位是因为每个页共4kb的数据(2^12)。<br><br><img src="/img/fy.png" srcset="/img/loading.gif" lazyload><br>页目录和页表有相同的结构，下面是常见的字段：</p>
+<ol>
+<li>Present位：为1页或页表有数据，为0没有数据。若在转换一个地址时，present为0则产生一个缺页异常。</li>
+<li>包含物理地址高20位的字段</li>
+<li>Dirty(脏位)：页表中。对一个页框写操作时设置脏位，表示内存中的数据和磁盘中数据不一致。</li>
+<li>read&#x2F;write标志：含有读写权限</li>
+</ol>
+<h2 id="物理地址扩展-PAE-分页机制"><a href="#物理地址扩展-PAE-分页机制" class="headerlink" title="物理地址扩展(PAE)分页机制"></a>物理地址扩展(PAE)分页机制</h2><p>Intel处理器管脚数从32增加到36(增加了物理地址)，寻址能力达到64GB，需要新的分页机制把32位线性地址转化为36为物理地址。<br><br>64Gb的RAM分为2^24个页框，每个页框（4KB）。页表项从20位扩展到24位。页表项大小从32位变为64位，因此数量从2^10变为2^9，页目录同理。多出来的2位引入一个页目录指针表(PDPT)，用来指向4个页目录中的1个。</p>
+<h2 id="转换后缓冲器-TLB"><a href="#转换后缓冲器-TLB" class="headerlink" title="转换后缓冲器(TLB)"></a>转换后缓冲器(TLB)</h2><p>TLB用于加速线性地址的转换，当一个线性地址第一次使用时，物理地址被存放到TLB中，以便同一个线性地址可以快速的得到转换。多处理系统中每个CPU都有自己的TLB。</p>
+<h1 id="Linux中的分页"><a href="#Linux中的分页" class="headerlink" title="Linux中的分页"></a>Linux中的分页</h1><p>从2.6.11版本开始Linux采用4级分页模型，分别为：</p>
+<ol>
+<li>页全局目录</li>
+<li>页上级目录</li>
+<li>页下级目录</li>
+<li>页表</li>
+</ol>
+<p><img src="/img/linuxfy.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="页表处理"><a href="#页表处理" class="headerlink" title="页表处理"></a>页表处理</h2><ol>
+<li>pte_t：页表项</li>
+<li>pmd_t：页下级目录</li>
+<li>pud_t：页上级目录</li>
+<li>pgd_t：页全局目录</li>
+</ol>
+<p>Linux定义了一系列读页标志函数，设置页标志函数，对页表操作的宏和页分配函数，这里不一一列举。</p>
+<h2 id="物理内存布局"><a href="#物理内存布局" class="headerlink" title="物理内存布局"></a>物理内存布局</h2><p>初始化阶段，内核就建立了一个物理地址映射来指定哪些物理地址范围对内核可用。<br>一般来说，Linux内核安装在物理地址0x00100000(第二个MB)开始的地方，为什么没有从0开始?</p>
+<ul>
+<li>物理地址0x000a0000-0x000fffff通常留给BIOS例程</li>
+<li>第一个MB内的其他页框可能由特定计算机模型保留</li>
+</ul>
+<h2 id="进程页表"><a href="#进程页表" class="headerlink" title="进程页表"></a>进程页表</h2><p>进程的线性空间分2部分</p>
+<ol>
+<li>0x00000000-0xbfffffff(3Gb)，无论用户态还是内核态都可以寻址</li>
+<li>0xc0000000-0xffffffff(1Gb),只有内核态可以寻址</li>
+</ol>
+<p>宏PAGR_OFFSET值为0xc0000000,表示内核生存空间开始的地方。</p>
 <!-- 
 ###### 6
 ---
@@ -305,7 +339,7 @@ It's a **demo** document, Preview it via the top right button!
 ---
 有序列表
 1. 第一
-2. 第二
+2. 第二2
 3. 第三
 ---
 
@@ -393,7 +427,7 @@ It's a **demo** document, Preview it via the top right button!
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/%E5%88%86%E9%A1%B5/" class="print-no-link">#分页</a>
+        <a href="/tags/page/" class="print-no-link">#page</a>
       
     </div>
   
